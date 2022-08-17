@@ -52,6 +52,7 @@ def parse_args():
         action="version",
         version=get_version()
     )
+    parser.add_argument("-i", "--ip", help="Use Virustotal IP search")
 
     # Validation
     parsed = parser.parse_args()
@@ -83,7 +84,12 @@ def main():
             progress.update(task1, advance=33)
             domain = vt.get_domain(args.hostname)
             progress.update(task1, advance=33)
-
+            
+            # check IP if option set
+            ip_result = []
+            if args.ip:
+                ip_result = vt.get_ip_report(args.ip)
+            
             # Resolutions and IP enrichments
             if args.max_resolutions != 0:
                 resolutions = vt.get_domain_resolutions(args.hostname)
@@ -125,6 +131,7 @@ def main():
         resolutions,
         whois,
         ip_enrich,
+        ip_result,
         max_resolutions=args.max_resolutions,
     )
     view.print(one_column=args.one_column)

@@ -60,6 +60,29 @@ class Attributes(BaseModel):
     reputation: int
     tags: List[str]
 
+class Ip_Attributes(BaseModel):
+    as_owner: Optional[str]
+    country: Optional[str]
+    last_analysis_results: LastAnalysisResults
+    last_analysis_stats: LastAnalysisStats
+    last_modification_date: Optional[int]
+    reputation: int
+    whois: Optional[str]
+
+
+class Ip_Data(BaseData):
+    attributes: Ip_Attributes
+    id_: str
+    type_: str
+
+    class Config:
+        fields = {
+            "id_": "id",
+            "type_": "type",
+        }
+
+class Ip(BaseModel):
+    data: Ip_Data
 
 class Data(BaseData):
     attributes: Attributes

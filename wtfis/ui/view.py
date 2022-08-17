@@ -19,6 +19,7 @@ from wtfis.models.virustotal import (
     LastAnalysisStats,
     PopularityRanks,
     Resolutions,
+    Ip,
 )
 from wtfis.ui.theme import Theme
 from wtfis.utils import iso_date, older_than, smart_join
@@ -39,6 +40,7 @@ class View:
         resolutions: Resolutions,
         whois: Union[Whois, HistoricalWhois],
         ip_enrich: List[IpWhois] = [],
+        ip_result: Ip = [],
         max_resolutions: int = 3,
     ) -> None:
         self.console = console
@@ -46,6 +48,7 @@ class View:
         self.resolutions = resolutions
         self.whois = whois
         self.ip_enrich = ip_enrich
+        self.ip_result = ip_result
         self.max_resolutions = max_resolutions
         self.theme = Theme()
 
@@ -232,6 +235,37 @@ class View:
         )
         return self._gen_panel("virustotal", self._gen_info(body, heading))
 
+    def ip_panel(self) -> Optional[Panel]:
+        # Skip if no IP
+        if not self.ip_result:
+            return None
+
+        ip_attributes = self.ip_result.data.attributes
+
+        ip_owner = ip_attributes.as_owner
+
+        ip_country = ip_attributes.country
+
+        ip_analysis = self._gen_vt_analysis_stats(
+            ip_attributes.last_analysis_stats,
+            self._vendors_who_flagged_malicious()
+        )
+
+        # Content
+        ip_heading = self._gen_heading_text(
+            self.ip_result.data.id_,
+            hyperlink=f"{self.vt_gui_baseurl_domain}/{self.domain.data.id_}"
+        )
+
+        ip_body = self._gen_table(
+            ("Owner:", ip_owner),
+            ("Country:", ip_country),
+            ("Analysis:", ip_analysis),
+            ("Last Modified:", iso_date(ip_attributes.last_modification_date))
+        )
+
+        return self._gen_panel("virustotal - ip", self._gen_info(ip_body, ip_heading))
+
     def resolutions_panel(self) -> Optional[Panel]:
         # Skip if no resolutions data
         if not self.resolutions:
@@ -305,6 +339,7 @@ class View:
             self.domain_panel(),
             self.resolutions_panel(),
             self.whois_panel(),
+            self.ip_panel(),
         ) if i is not None]
 
         if one_column:

@@ -1,7 +1,7 @@
 from typing import Optional
 
 from wtfis.clients.base import BaseClient
-from wtfis.models.virustotal import Domain, HistoricalWhois, Resolutions
+from wtfis.models.virustotal import Domain, HistoricalWhois, Resolutions, Ip
 
 
 class VTClient(BaseClient):
@@ -25,3 +25,6 @@ class VTClient(BaseClient):
 
     def get_domain_whois(self, domain: str) -> HistoricalWhois:
         return HistoricalWhois.parse_obj(self._get(f"/domains/{domain}/historical_whois"))
+
+    def get_ip_report(self, ip: str) -> Ip:
+        return Ip.parse_obj(self._get(f"/ip_addresses/{ip}"))
